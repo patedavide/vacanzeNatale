@@ -3,62 +3,45 @@ import java.util.Scanner;
 
 public class Main {
     private static final String FILE_INPUT = "paterno_fisso_parte2.csv";
-    private static final int LUNGHEZZA_RECORD = 333;  // I TUOI dati!
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("=== PARTE 4: Ricerca Record ===");
 
-        System.out.println("=== PARTE 3: Aggiungi + Visualizza ===");
+        System.out.print("Cerca testo (es: Alabama, Florida, Italia): ");
+        String cerca = scanner.nextLine().trim().toLowerCase();
 
-        aggiungiRecordEsempio();
-        visualizzaDati(scanner);
-
-        scanner.close();
-    }
-
-    private static void aggiungiRecordEsempio() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_INPUT, true))) {
-            // Record esempio ITALIA
-            String nuovoRecord = "Terapia Mentale,Italia,Adulto,2026,25.5,23.1,28.0,23.1-28.0,15,N";
-
-            // Padding a 333 char
-            StringBuilder padded = new StringBuilder(nuovoRecord);
-            while (padded.length() < LUNGHEZZA_RECORD) {
-                padded.append(" ");
-            }
-
-            bw.write(padded.toString());
-            bw.newLine();
-
-            System.out.println(" Nuovo record ITALIA aggiunto!");
-
-        } catch (IOException e) {
-            System.err.println("Errore: " + e.getMessage());
-        }
-    }
-
-    private static void visualizzaDati(Scanner scanner) {
-        System.out.print("Visualizza record # (0=primo): ");
-        int numRecord = scanner.nextInt();
-
+        int trovati = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT))) {
             String linea;
             int riga = 0;
 
-            while ((linea = br.readLine()) != null && riga <= numRecord) {
-                if (riga == numRecord) {
+            while ((linea = br.readLine()) != null) {
+                // Cerco ovunque nella riga, non solo in un campo
+                if (linea.toLowerCase().contains(cerca)) {
                     String[] campi = linea.split(",", -1);
-                    System.out.println("\n=== RECORD " + numRecord + " ===");
-                    System.out.println("1. Indicatore: " + (campi.length > 0 ? campi[0].trim() : "N/A"));
-                    System.out.println("3. Stato: " + (campi.length > 2 ? campi[2].trim() : "N/A"));
-                    System.out.println("10. Valore: " + (campi.length > 9 ? campi[9].trim() : "N/A"));
-                    return;
+
+                    System.out.println("\n RECORD " + riga + ":");
+                    System.out.println("  Indicatore: " + (campi.length > 0 ? campi[0].trim() : ""));
+                    System.out.println("  Gruppo: " + (campi.length > 1 ? campi[1].trim() : ""));
+                    System.out.println("  Stato: " + (campi.length > 2 ? campi[2].trim() : ""));
+                    System.out.println("  Valore: " + (campi.length > 9 ? campi[9].trim() : ""));
+                    System.out.println("  Campo 4 (Subgroup): " + (campi.length > 3 ? campi[3].trim() : ""));
+                    System.out.println("  Campo 5: " + (campi.length > 4 ? campi[4].trim() : ""));
+                    trovati++;
+                    if (trovati >= 5) break; // Mostra max 5 risultati
                 }
                 riga++;
             }
-            System.out.println("Record " + numRecord + " non trovato");
+
+            if (trovati == 0) {
+                System.out.println(" Nessun record contenente '" + cerca + "'");
+            }
+
         } catch (IOException e) {
             System.err.println("Errore: " + e.getMessage());
         }
+
+        scanner.close();
     }
 }
