@@ -1,70 +1,64 @@
 import java.io.*;
+import java.util.Scanner;
 
 public class Main {
-    private static final String FILE_INPUT = "paterno_modificato_parte1.csv";
-    private static final String FILE_OUTPUT = "paterno_fisso_parte2.csv";
-    private static int[] maxLunghezzeCampi;
-    private static int lunghezzaMaxRecord;
+    private static final String FILE_INPUT = "paterno_fisso_parte2.csv";
+    private static final int LUNGHEZZA_RECORD = 333;  // I TUOI dati!
 
     public static void main(String[] args) {
-        calcolaMaxLunghezze();
-        applicaPaddingFisso();
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("=== PARTE 3: Aggiungi + Visualizza ===");
+
+        aggiungiRecordEsempio();
+        visualizzaDati(scanner);
+
+        scanner.close();
     }
 
-    private static void calcolaMaxLunghezze() {
-        maxLunghezzeCampi = new int[17];
-        lunghezzaMaxRecord = 0;
+    private static void aggiungiRecordEsempio() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_INPUT, true))) {
+            // Record esempio ITALIA
+            String nuovoRecord = "Terapia Mentale,Italia,Adulto,2026,25.5,23.1,28.0,23.1-28.0,15,N";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                String[] campi = linea.split(",", -1);  // VIRGOLA!
-                int lenRecord = linea.length();
-
-                if (lenRecord > lunghezzaMaxRecord) {
-                    lunghezzaMaxRecord = lenRecord;
-                }
-
-                for (int i = 0; i < Math.min(campi.length, maxLunghezzeCampi.length); i++) {
-                    maxLunghezzeCampi[i] = Math.max(maxLunghezzeCampi[i], campi[i].length());
-                }
+            // Padding a 333 char
+            StringBuilder padded = new StringBuilder(nuovoRecord);
+            while (padded.length() < LUNGHEZZA_RECORD) {
+                padded.append(" ");
             }
 
-            System.out.println(" Lunghezza max record: " + lunghezzaMaxRecord);
-            System.out.println("File con padding creato: " + FILE_OUTPUT);
+            bw.write(padded.toString());
+            bw.newLine();
+
+            System.out.println(" Nuovo record ITALIA aggiunto!");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Errore: " + e.getMessage());
         }
     }
 
-    private static void applicaPaddingFisso() {
-        try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT));
-             BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_OUTPUT))) {
+    private static void visualizzaDati(Scanner scanner) {
+        System.out.print("Visualizza record # (0=primo): ");
+        int numRecord = scanner.nextInt();
 
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT))) {
             String linea;
-            while ((linea = br.readLine()) != null) {
-                String[] campi = linea.split(",", -1);
-                StringBuilder recordFisso = new StringBuilder();
+            int riga = 0;
 
-                for (int i = 0; i < Math.min(campi.length, maxLunghezzeCampi.length); i++) {
-                    if (i > 0) recordFisso.append(",");
-                    String campo = campi[i];
-                    recordFisso.append(campo);
-                    recordFisso.append(" ".repeat(maxLunghezzeCampi[i] - campo.length()));
+            while ((linea = br.readLine()) != null && riga <= numRecord) {
+                if (riga == numRecord) {
+                    String[] campi = linea.split(",", -1);
+                    System.out.println("\n=== RECORD " + numRecord + " ===");
+                    System.out.println("1. Indicatore: " + (campi.length > 0 ? campi[0].trim() : "N/A"));
+                    System.out.println("3. Stato: " + (campi.length > 2 ? campi[2].trim() : "N/A"));
+                    System.out.println("10. Valore: " + (campi.length > 9 ? campi[9].trim() : "N/A"));
+                    return;
                 }
-
-                while (recordFisso.length() < lunghezzaMaxRecord) {
-                    recordFisso.append(" ");
-                }
-
-                bw.write(recordFisso.toString());
-                bw.newLine();
+                riga++;
             }
-            System.out.println(" PARTE 2 COMPLETATA!");
-
+            System.out.println("Record " + numRecord + " non trovato");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Errore: " + e.getMessage());
         }
     }
 }
