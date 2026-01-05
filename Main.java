@@ -1,43 +1,67 @@
 import java.io.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
-    private static final String FILE_INPUT = "paterno.csv";
-    private static final String FILE_OUTPUT = "paterno_modificato_parte1.csv";
+    private static final String FILE_INPUT = "paterno_modificato_parte1.csv";
+    private static final String FILE_OUTPUT = "paterno_fisso_parte2.csv";
+    private static int[] maxLunghezzeCampi;
+    private static int lunghezzaMaxRecord;
 
     public static void main(String[] args) {
+        calcolaMaxLunghezze();
+        applicaPaddingFisso();
+    }
+
+    private static void calcolaMaxLunghezze() {
+        maxLunghezzeCampi = new int[17];
+        lunghezzaMaxRecord = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] campi = linea.split(",", -1);  // VIRGOLA!
+                int lenRecord = linea.length();
+
+                if (lenRecord > lunghezzaMaxRecord) {
+                    lunghezzaMaxRecord = lenRecord;
+                }
+
+                for (int i = 0; i < Math.min(campi.length, maxLunghezzeCampi.length); i++) {
+                    maxLunghezzeCampi[i] = Math.max(maxLunghezzeCampi[i], campi[i].length());
+                }
+            }
+
+            System.out.println(" Lunghezza max record: " + lunghezzaMaxRecord);
+            System.out.println("File con padding creato: " + FILE_OUTPUT);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void applicaPaddingFisso() {
         try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT));
              BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_OUTPUT))) {
 
             String linea;
-            boolean primaLinea = true;
-
             while ((linea = br.readLine()) != null) {
-                // DEBUG: mostra separatore reale
-                System.out.println("DEBUG Riga: " + linea.substring(0, 50));
+                String[] campi = linea.split(",", -1);
+                StringBuilder recordFisso = new StringBuilder();
 
-                // PROVA DIVERSI SEPARATORI
-                String[] campi = linea.split("\\|", -1); // Pipe
-                if (campi.length == 1) {
-                    campi = linea.split(",", -1); // Virgola
-                    System.out.println("Usato separatore VIRGOLA");
+                for (int i = 0; i < Math.min(campi.length, maxLunghezzeCampi.length); i++) {
+                    if (i > 0) recordFisso.append(",");
+                    String campo = campi[i];
+                    recordFisso.append(campo);
+                    recordFisso.append(" ".repeat(maxLunghezzeCampi[i] - campo.length()));
                 }
 
-                System.out.println("Numero campi nel record: " + campi.length);
-
-                if (primaLinea) {
-                    String nuovoHeader = linea + ",miovalore,cancellato";
-                    bw.write(nuovoHeader);
-                    primaLinea = false;
-                } else {
-                    int miovalore = ThreadLocalRandom.current().nextInt(10, 21);
-                    String nuovoRecord = linea + "," + miovalore + ",N";
-                    bw.write(nuovoRecord);
+                while (recordFisso.length() < lunghezzaMaxRecord) {
+                    recordFisso.append(" ");
                 }
+
+                bw.write(recordFisso.toString());
                 bw.newLine();
             }
-
-            System.out.println("File modificato salvato: " + FILE_OUTPUT);
+            System.out.println(" PARTE 2 COMPLETATA!");
 
         } catch (IOException e) {
             e.printStackTrace();
