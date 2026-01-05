@@ -3,45 +3,93 @@ import java.util.Scanner;
 
 public class Main {
     private static final String FILE_INPUT = "paterno_fisso_parte2.csv";
+    private static final String TEMP_FILE = "temp_cancellazione.csv";
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("=== PARTE 4: Ricerca Record ===");
+        System.out.println("=== PARTE 5: Cancellazione Logica + DEBUG ===");
 
-        System.out.print("Cerca testo (es: Alabama, Florida, Italia): ");
-        String cerca = scanner.nextLine().trim().toLowerCase();
+        cancellaLogicamente(scanner);
+        debugTuttiCampi(scanner);
 
-        int trovati = 0;
-        try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT))) {
+        scanner.close();
+    }
+
+    private static void cancellaLogicamente(Scanner scanner) {
+        System.out.print("Record da cancellare (numero): ");
+        int recordDaCancellare = scanner.nextInt();
+        scanner.nextLine();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT));
+             BufferedWriter bw = new BufferedWriter(new FileWriter(TEMP_FILE))) {
+
             String linea;
-            int riga = 0;
+            int rigaCorrente = 0;
 
             while ((linea = br.readLine()) != null) {
-                // Cerco ovunque nella riga, non solo in un campo
-                if (linea.toLowerCase().contains(cerca)) {
+                if (rigaCorrente == recordDaCancellare) {
                     String[] campi = linea.split(",", -1);
+                    System.out.println("DEBUG: Record " + rigaCorrente + " ha " + campi.length + " campi");
 
-                    System.out.println("\n RECORD " + riga + ":");
-                    System.out.println("  Indicatore: " + (campi.length > 0 ? campi[0].trim() : ""));
-                    System.out.println("  Gruppo: " + (campi.length > 1 ? campi[1].trim() : ""));
-                    System.out.println("  Stato: " + (campi.length > 2 ? campi[2].trim() : ""));
-                    System.out.println("  Valore: " + (campi.length > 9 ? campi[9].trim() : ""));
-                    System.out.println("  Campo 4 (Subgroup): " + (campi.length > 3 ? campi[3].trim() : ""));
-                    System.out.println("  Campo 5: " + (campi.length > 4 ? campi[4].trim() : ""));
-                    trovati++;
-                    if (trovati >= 5) break; // Mostra max 5 risultati
+                    // FORZA ULTIMO CAMPO = "S"
+                    campi[campi.length - 1] = "S";
+
+                    // Ricostruisci
+                    StringBuilder nuovaRiga = new StringBuilder();
+                    for (int i = 0; i < campi.length; i++) {
+                        if (i > 0) nuovaRiga.append(",");
+                        nuovaRiga.append(campi[i]);
+                    }
+                    // Padding ESATTO 333
+                    while (nuovaRiga.length() < 333) nuovaRiga.append(" ");
+                    if (nuovaRiga.length() > 333) nuovaRiga.setLength(333);
+
+                    bw.write(nuovaRiga.toString());
+                    System.out.println("DEBUG: Ultimo campo impostato = 'S'");
+                } else {
+                    bw.write(linea);
                 }
-                riga++;
+                bw.newLine();
+                rigaCorrente++;
             }
 
-            if (trovati == 0) {
-                System.out.println(" Nessun record contenente '" + cerca + "'");
-            }
+            // Sostituisci
+            new File(FILE_INPUT).delete();
+            new File(TEMP_FILE).renameTo(new File(FILE_INPUT));
+            System.out.println(" Record " + recordDaCancellare + " modificato");
 
         } catch (IOException e) {
             System.err.println("Errore: " + e.getMessage());
         }
+    }
 
-        scanner.close();
+    private static void debugTuttiCampi(Scanner scanner) {
+        System.out.print("Debug record # : ");
+        int debugRecord = scanner.nextInt();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT))) {
+            String linea;
+            int riga = 0;
+
+            while ((linea = br.readLine()) != null && riga <= debugRecord) {
+                if (riga == debugRecord) {
+                    String[] campi = linea.split(",", -1);
+                    System.out.println("\n=== DEBUG RECORD " + debugRecord + " (" + campi.length + " campi) ===");
+
+                    // STAMPA TUTTI I CAMPI
+                    for (int i = 0; i < Math.min(20, campi.length); i++) {
+                        String valore = campi[i].trim();
+                        System.out.println("Campo " + (i+1) + ": '" + valore + "' (" + valore.length() + " char)");
+                    }
+                    if (campi.length > 20) {
+                        System.out.println("... + " + (campi.length - 20) + " campi");
+                    }
+                    return;
+                }
+                riga++;
+            }
+        } catch (IOException e) {
+            System.err.println("Errore: " + e.getMessage());
+        }
     }
 }
