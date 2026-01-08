@@ -7,7 +7,7 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("=== PARTE 5: Cancellazione Logica + DEBUG ===");
+        System.out.println("PARTE 5: Cancellazione Logica");
 
         cancellaLogicamente(scanner);
         debugTuttiCampi(scanner);
@@ -29,7 +29,7 @@ public class Main {
             while ((linea = br.readLine()) != null) {
                 if (rigaCorrente == recordDaCancellare) {
                     String[] campi = linea.split(",", -1);
-                    System.out.println("DEBUG: Record " + rigaCorrente + " ha " + campi.length + " campi");
+                    System.out.println("Record " + rigaCorrente + " ha " + campi.length + " campi");
 
                     // FORZA ULTIMO CAMPO = "S"
                     campi[campi.length - 1] = "S";
@@ -45,7 +45,7 @@ public class Main {
                     if (nuovaRiga.length() > 333) nuovaRiga.setLength(333);
 
                     bw.write(nuovaRiga.toString());
-                    System.out.println("DEBUG: Ultimo campo impostato = 'S'");
+                    System.out.println("Ultimo campo impostato = 'S'");
                 } else {
                     bw.write(linea);
                 }
@@ -64,7 +64,7 @@ public class Main {
     }
 
     private static void debugTuttiCampi(Scanner scanner) {
-        System.out.print("Debug record # : ");
+        System.out.print("Record # : ");
         int debugRecord = scanner.nextInt();
 
         try (BufferedReader br = new BufferedReader(new FileReader(FILE_INPUT))) {
@@ -74,7 +74,7 @@ public class Main {
             while ((linea = br.readLine()) != null && riga <= debugRecord) {
                 if (riga == debugRecord) {
                     String[] campi = linea.split(",", -1);
-                    System.out.println("\n=== DEBUG RECORD " + debugRecord + " (" + campi.length + " campi) ===");
+                    System.out.println("\n RECORD " + debugRecord + " (" + campi.length + " campi) ");
 
                     // STAMPA TUTTI I CAMPI
                     for (int i = 0; i < Math.min(20, campi.length); i++) {
