@@ -75,34 +75,6 @@ public class GestioneFileCSV {
         return max;
     }
 
-    //Punto numero 3 bis
-
-    public int[] calcolaLunghezzaMassimaCampi() {
-        int[] maxCampi;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(fileInput))) {
-            String linea = br.readLine();
-            String[] campi = linea.split(separatore, -1);
-            maxCampi = new int[campi.length];
-
-            for (int i = 0; i < campi.length; i++)
-                maxCampi[i] = campi[i].length();
-
-            while ((linea = br.readLine()) != null) {
-                campi = linea.split(separatore, -1);
-                for (int i = 0; i < campi.length; i++) {
-                    if (campi[i].length() > maxCampi[i])
-                        maxCampi[i] = campi[i].length();
-                }
-            }
-
-            return maxCampi;
-
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
     //Punto numero 4
 
     public void rendiRecordFissi() {
