@@ -4,7 +4,7 @@ public class Main {
 
         GestioneFileCSV gestione = new GestioneFileCSV(
                 "paterno.csv",   // CSV reale
-                "temp.csv",
+                "temp_cancellazione.csv",
                 ","
         );
 
