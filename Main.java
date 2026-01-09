@@ -3,8 +3,8 @@ public class Main {
     public static void main(String[] args) {
 
         GestioneFileCSV gestione = new GestioneFileCSV(
-                "paterno.csv",   // CSV reale
-                "paterno_modificato.csv",
+                "paterno.csv",   // CSV da dove preleva dati
+                "paterno_modificato.csv", //CSV modificato per effettuare le modifiche
                 ","
         );
 
