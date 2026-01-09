@@ -3,7 +3,7 @@ public class Main {
     public static void main(String[] args) {
 
         GestioneFileCSV gestione = new GestioneFileCSV(
-                "health_data.csv",   // CSV reale
+                "paterno.csv",   // CSV reale
                 "temp.csv",
                 ","
         );
