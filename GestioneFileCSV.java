@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Random;
 
 public class GestioneFileCSV {
 
@@ -7,10 +8,12 @@ public class GestioneFileCSV {
     private String separatore;
     private int lunghezzaRecordFissa = -1;
 
-    // indici dei campi REALI del CSV
+    // Indici dei campi REALI che vogliamo visualizzare
     public static final int CAMPO_INDICATOR = 0;
     public static final int CAMPO_STATE = 2;
     public static final int CAMPO_VALUE = 9;
+
+    private Random random = new Random();
 
     public GestioneFileCSV(String fileInput, String fileTemp, String separatore) {
         this.fileInput = fileInput;
@@ -18,8 +21,7 @@ public class GestioneFileCSV {
         this.separatore = separatore;
     }
 
-    //Punto numero 1
-
+    // Punto 1
     public void aggiungiCampiFinali() {
         try (BufferedReader br = new BufferedReader(new FileReader(fileInput));
              BufferedWriter bw = new BufferedWriter(new FileWriter(fileTemp))) {
@@ -29,10 +31,11 @@ public class GestioneFileCSV {
 
             while ((linea = br.readLine()) != null) {
                 if (primaRiga) {
+                    // intestazione
                     bw.write(linea + separatore + "miovalore" + separatore + "cancellato");
                     primaRiga = false;
                 } else {
-                    int valore = 10 + (int)(Math.random() * 11);
+                    int valore = 10 + random.nextInt(11); // 10<=X<=20
                     bw.write(linea + separatore + valore + separatore + "N");
                 }
                 bw.newLine();
@@ -45,8 +48,7 @@ public class GestioneFileCSV {
         }
     }
 
-    //Punto numero 2
-
+    // Punto 2
     public int contaCampi() {
         try (BufferedReader br = new BufferedReader(new FileReader(fileInput))) {
             String intestazione = br.readLine();
@@ -56,11 +58,9 @@ public class GestioneFileCSV {
         }
     }
 
-    //Punto numero 3
-
+    // Punto 3
     public int calcolaLunghezzaMassimaRecord() {
         int max = 0;
-
         try (BufferedReader br = new BufferedReader(new FileReader(fileInput))) {
             String linea;
             while ((linea = br.readLine()) != null) {
@@ -70,13 +70,11 @@ public class GestioneFileCSV {
         } catch (IOException e) {
             System.err.println("Errore: " + e.getMessage());
         }
-
         lunghezzaRecordFissa = max;
         return max;
     }
 
-    //Punto numero 4
-
+    // Punto 4
     public void rendiRecordFissi() {
         if (lunghezzaRecordFissa <= 0)
             calcolaLunghezzaMassimaRecord();
@@ -85,7 +83,6 @@ public class GestioneFileCSV {
              BufferedWriter bw = new BufferedWriter(new FileWriter(fileTemp))) {
 
             String linea;
-
             while ((linea = br.readLine()) != null) {
                 StringBuilder sb = new StringBuilder(linea);
                 while (sb.length() < lunghezzaRecordFissa)
@@ -101,62 +98,62 @@ public class GestioneFileCSV {
         }
     }
 
-    //Punto numero 5
-
+    // Punto 5
     public void aggiungiRecord(String[] campi) {
-        try (BufferedWriter bw = new BufferedWriter(
-                new FileWriter(fileInput, true))) {
-
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileInput, true))) {
             bw.newLine();
             bw.write(String.join(separatore, campi));
-
         } catch (IOException e) {
             System.err.println("Errore: " + e.getMessage());
         }
     }
 
-    //Punto numero 6
-
+    // Punto 6
     public void visualizzaTreCampi() {
+        try (BufferedReader br = new BufferedReader(new FileReader(fileInput))) {
+            String intestazione = br.readLine(); // intestazione
+            System.out.println("=== Visualizzazione dei dati più importanti ===");
+            System.out.println("Indicator | State | Value");
+
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] campi = linea.split(separatore, -1);
+
+                String indicator = campi.length > CAMPO_INDICATOR ? campi[CAMPO_INDICATOR] : "";
+                String state = campi.length > CAMPO_STATE ? campi[CAMPO_STATE] : "";
+                String value = campi.length > CAMPO_VALUE ? campi[CAMPO_VALUE] : "";
+
+                System.out.println(indicator + " | " + state + " | " + value);
+            }
+        } catch (IOException e) {
+            System.err.println("Errore: " + e.getMessage());
+        }
+    }
+
+    // Punto 7
+    public void cercaPerIndicator(String indicator) {
         try (BufferedReader br = new BufferedReader(new FileReader(fileInput))) {
             br.readLine(); // intestazione
             String linea;
+            boolean trovato = false;
 
             while ((linea = br.readLine()) != null) {
                 String[] campi = linea.split(separatore, -1);
-                System.out.println(
-                        campi[CAMPO_INDICATOR] + " | " +
-                                campi[CAMPO_STATE] + " | " +
-                                campi[CAMPO_VALUE]
-                );
-            }
-        } catch (IOException e) {
-            System.err.println("Errore: " + e.getMessage());
-        }
-    }
-
-    //Punto numero 7
-
-    public void cercaPerIndicator(String indicator) {
-        try (BufferedReader br = new BufferedReader(new FileReader(fileInput))) {
-            br.readLine();
-            String linea;
-
-            while ((linea = br.readLine()) != null) {
-                String[] campi = linea.split(separatore, -1);
-                if (campi[CAMPO_INDICATOR].equalsIgnoreCase(indicator)) {
+                if (campi.length > CAMPO_INDICATOR && campi[CAMPO_INDICATOR].equalsIgnoreCase(indicator)) {
                     System.out.println("Record trovato:\n" + linea);
-                    return;
+                    trovato = true;
+                    break;
                 }
             }
-            System.out.println("Record non trovato");
+
+            if (!trovato) System.out.println("Record non trovato.");
+
         } catch (IOException e) {
             System.err.println("Errore: " + e.getMessage());
         }
     }
 
-    //Punto numero 8
-
+    // Punto 8
     public void modificaRecord(int riga, int campo, String nuovoValore) {
         try (BufferedReader br = new BufferedReader(new FileReader(fileInput));
              BufferedWriter bw = new BufferedWriter(new FileWriter(fileTemp))) {
@@ -167,7 +164,8 @@ public class GestioneFileCSV {
             while ((linea = br.readLine()) != null) {
                 if (rigaCorrente == riga) {
                     String[] campi = linea.split(separatore, -1);
-                    campi[campo] = nuovoValore;
+                    if (campo < campi.length)
+                        campi[campo] = nuovoValore;
                     bw.write(String.join(separatore, campi));
                 } else {
                     bw.write(linea);
@@ -183,7 +181,7 @@ public class GestioneFileCSV {
         }
     }
 
-    //Punto numero 9
+    // Punto 9
     public void cancellaLogicamente(int riga) {
         try (BufferedReader br = new BufferedReader(new FileReader(fileInput));
              BufferedWriter bw = new BufferedWriter(new FileWriter(fileTemp))) {
@@ -194,7 +192,8 @@ public class GestioneFileCSV {
             while ((linea = br.readLine()) != null) {
                 if (rigaCorrente == riga) {
                     String[] campi = linea.split(separatore, -1);
-                    campi[campi.length - 1] = "S";
+                    if (campi.length > 0)
+                        campi[campi.length - 1] = "S"; // marca come cancellato
                     bw.write(String.join(separatore, campi));
                 } else {
                     bw.write(linea);
@@ -210,6 +209,7 @@ public class GestioneFileCSV {
         }
     }
 
+    // Sostituisce il file originale con il file temporaneo
     private void sostituisciFile() {
         new File(fileInput).delete();
         new File(fileTemp).renameTo(new File(fileInput));

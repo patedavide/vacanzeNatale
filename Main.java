@@ -1,27 +1,54 @@
 public class Main {
-
     public static void main(String[] args) {
 
         GestioneFileCSV gestione = new GestioneFileCSV(
-                "paterno.csv",   // CSV da dove preleva dati
-                "paterno_modificato.csv", //CSV modificato per effettuare le modifiche
+                "paterno.csv",
+                "paterno_modificato.csv",
                 ","
         );
 
-        gestione.aggiungiCampiFinali();              //Punto 1
-        System.out.println("Numero campi: " + gestione.contaCampi()); //Punto 2
+        // 1
+        gestione.aggiungiCampiFinali();
 
-        System.out.println("Lunghezza max record: " +
-                gestione.calcolaLunghezzaMassimaRecord()); //Punto 3
+        // 2
+        System.out.println("Numero campi: " + gestione.contaCampi());
 
-        gestione.rendiRecordFissi();                 //Punto 4
+        // 3
+        System.out.println("Lunghezza max record: " + gestione.calcolaLunghezzaMassimaRecord());
 
-        gestione.visualizzaTreCampi();               //Punto 6
+        // 4
+        gestione.rendiRecordFissi();
 
-        gestione.cercaPerIndicator("Life expectancy"); //Punto 7
+        // 5
+        String[] nuovoRecord = {
+                "\"Received Counseling or Therapy, Last 4 Weeks\"",
+                "By Sex",
+                "United States",
+                "Male",
+                "2",
+                "15",
+                "\"Sep 16 - Sep 28, 2020\"",
+                "09/16/2020",
+                "09/28/2020",
+                "6.9",
+                "6.5",
+                "7.3",
+                "6.5 - 7.3",
+                "", // miovalore
+                ""  // cancellato
+        };
+        gestione.aggiungiRecord(nuovoRecord);
 
-        gestione.modificaRecord(1, 9, "80.5");       //Punto 8
+        // 6
+        gestione.visualizzaTreCampi();
 
-        gestione.cancellaLogicamente(2);             //Punto 9
+        // 7
+        gestione.cercaPerIndicator("\"Received Counseling or Therapy, Last 4 Weeks\"");
+
+        // 8
+        gestione.modificaRecord(1, 9, "80.5"); // esempio
+
+        // 9
+        gestione.cancellaLogicamente(2);
     }
 }
